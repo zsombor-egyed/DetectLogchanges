@@ -1,0 +1,20 @@
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\DetectLogchanges.exe.config
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\DetectLogchanges.exe
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\DetectLogchanges.pdb
+D:\VS Projects\DetectLogchanges\DetectLogchanges\obj\Debug\DetectLogchanges.csprojResolveAssemblyReference.cache
+D:\VS Projects\DetectLogchanges\DetectLogchanges\obj\Debug\DetectLogchanges.exe
+D:\VS Projects\DetectLogchanges\DetectLogchanges\obj\Debug\DetectLogchanges.pdb
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Newtonsoft.Json.dll
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Npgsql.dll
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Newtonsoft.Json.xml
+D:\VS Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Npgsql.xml
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\DetectLogchanges.exe.config
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\obj\Debug\DetectLogchanges.exe
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\obj\Debug\DetectLogchanges.pdb
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\DetectLogchanges.exe
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\DetectLogchanges.pdb
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Npgsql.dll
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\bin\Debug\Npgsql.xml
+C:\Users\Zsombor\Documents\Visual Studio 2015\Projects\DetectLogchanges\DetectLogchanges\obj\Debug\DetectLogchanges.csprojResolveAssemblyReference.cache
