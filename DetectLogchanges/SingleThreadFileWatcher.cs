@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Permissions;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DetectLogchanges
 {
@@ -55,43 +53,54 @@ namespace DetectLogchanges
             while (Console.Read() != 'q') ;
         }
 
-        // Define the event handlers.
-        private static void OnChanged(object source, FileSystemEventArgs e)
+        static void writeOutChanges(string fullPath)
         {
-            if(stateOfFiles.ContainsKey(e.FullPath))
+            if (stateOfFiles.ContainsKey(fullPath))
             {
-                using (var fs = new FileStream(e.FullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
                 using (var sr = new StreamReader(fs))
                 {
                     string line;
                     long offset = 0;
                     //read the first part of the file (no changes here)
-                    for (long i = 0; i < stateOfFiles[e.FullPath]; i++)
+                    for (long i = 0; i < stateOfFiles[fullPath]; i++)
                         sr.ReadLine();
+
                     PostgreSQL pg = new PostgreSQL(dbconn); //open the DB connection
-                    //read the new lines which appended to the file
-                    while ((line = sr.ReadLine()) != null)
+                    using (FileStream file = new FileStream(@"C:\tmp\out\" + Path.GetFileName(fullPath), FileMode.Append, FileAccess.Write, FileShare.Read))
+                    using (StreamWriter writer = new StreamWriter(file, Encoding.UTF8))
                     {
-                        offset++;
-                        //    pg.insertToServerlogsTable(Path.GetFileName(fullpath), line);
-                        Console.WriteLine(line);
-                    }
-                    pg.closeDB(); //close database connection
-                    stateOfFiles[e.FullPath] += offset;
+                        //read the new lines which appended to the file
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            offset++;
+                            //    pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
+                            Console.WriteLine(line);
+                            writer.WriteLine(line);
+                        }
+                        pg.closeDB(); //close database connection
+                        stateOfFiles[fullPath] += offset;
+                    }                    
                 }
             }
             else
             {
-                using (var fs = new FileStream(e.FullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
+                using (var fs = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
                 using (var sr = new StreamReader(fs))
                 {
                     long lineCounter = 0;
-                    while ( sr.ReadLine() != null)
-                        lineCounter++;    
-                                   
-                    stateOfFiles.Add(e.FullPath, lineCounter);
+                    while (sr.ReadLine() != null)
+                        lineCounter++;
+
+                    stateOfFiles.Add(fullPath, lineCounter);
                 }
             }
+        }
+
+        // Define the event handlers.
+        private static void OnChanged(object source, FileSystemEventArgs e)
+        {
+            writeOutChanges(e.FullPath);
         }
     }
 }

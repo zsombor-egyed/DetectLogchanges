@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Net;
-using System.Security.Permissions;
 
 namespace DetectLogchanges
 {
     /// <summary>
-    /// TODO: 
+    /// TODO: beégetett pareméterekkel kezdeni valamit
     /// </summary>
     class Program
     {
@@ -24,7 +16,7 @@ namespace DetectLogchanges
         static List<string> configlist;
 
         /// <summary>
-        /// set hostname, DB connection string read configuration from TabMon.config
+        /// set hostname, DB connection stringa and read configuration from TabMon.config
         /// </summary>
         static void init()
         {
@@ -44,7 +36,9 @@ namespace DetectLogchanges
             init();
             //configlist.ElementAt(0) is path to watched folder
             //configlist.ElementAt(1) is a pattern e.g. "*.txt"
-            SingleThreadFileWatcher stfw = new SingleThreadFileWatcher(configlist.ElementAt(0), configlist.ElementAt(1), pgsqlConnString);
+            SingleThreadFileWatcher stfw = new SingleThreadFileWatcher(configlist.ElementAt(0), configlist.ElementAt(1),
+                pgsqlConnString);
+            //start watching the files
             stfw.watchChanges();
         } 
 
