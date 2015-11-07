@@ -49,7 +49,7 @@ namespace DetectLogchanges
             // Begin watching.
             watcher.EnableRaisingEvents = true;
             // Wait for the user to quit the program.
-            Console.WriteLine("Press \'q\' to quit the sample.");
+            Console.WriteLine("Press \'q\' to quit the program.");
             while (Console.Read() != 'q') ;
         }
 
@@ -67,20 +67,15 @@ namespace DetectLogchanges
                         sr.ReadLine();
 
                     PostgreSQL pg = new PostgreSQL(dbconn); //open the DB connection
-                    using (FileStream file = new FileStream(@"C:\tmp\out\" + Path.GetFileName(fullPath), FileMode.Append, FileAccess.Write, FileShare.Read))
-                    using (StreamWriter writer = new StreamWriter(file, Encoding.UTF8))
+                    //read the new lines which appended to the file
+                    while ((line = sr.ReadLine()) != null)
                     {
-                        //read the new lines which appended to the file
-                        while ((line = sr.ReadLine()) != null)
-                        {
-                            offset++;
-                            //    pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
-                            Console.WriteLine(line);
-                            writer.WriteLine(line);
-                        }
-                        pg.closeDB(); //close database connection
-                        stateOfFiles[fullPath] += offset;
-                    }                    
+                        offset++;
+                        pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
+                        Console.WriteLine(line);
+                    }
+                    pg.closeDB(); //close database connection
+                    stateOfFiles[fullPath] += offset;                                     
                 }
             }
             else
@@ -91,7 +86,6 @@ namespace DetectLogchanges
                     long lineCounter = 0;
                     while (sr.ReadLine() != null)
                         lineCounter++;
-
                     stateOfFiles.Add(fullPath, lineCounter);
                 }
             }
