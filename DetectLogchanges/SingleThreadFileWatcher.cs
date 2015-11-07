@@ -9,7 +9,7 @@ namespace DetectLogchanges
     class SingleThreadFileWatcher
     {
         string watchedFolderPath;
-        string filter; //e.g "*.txt
+        string filter; //e.g "*.txt"
         static string dbconn;
         static Dictionary<string, long> stateOfFiles; //contains filename and actual number of lines in the file
         public SingleThreadFileWatcher(string folderpath, string filter, string pgsqlConnString)
@@ -42,9 +42,11 @@ namespace DetectLogchanges
         [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
         public void watchChanges()
         {
+            // https://msdn.microsoft.com/en-us/library/system.io.filesystemwatcher(v=vs.110).aspx
             FileSystemWatcher watcher = new FileSystemWatcher(Path.GetDirectoryName(watchedFolderPath), filter);
             watcher.NotifyFilter = NotifyFilters.LastWrite;
             watcher.Changed += new FileSystemEventHandler(OnChanged);
+            watcher.Created += new FileSystemEventHandler(OnChanged);
 
             // Begin watching.
             watcher.EnableRaisingEvents = true;
@@ -71,7 +73,7 @@ namespace DetectLogchanges
                     while ((line = sr.ReadLine()) != null)
                     {
                         offset++;
-                        pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
+                        //pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
                         Console.WriteLine(line);
                     }
                     pg.closeDB(); //close database connection

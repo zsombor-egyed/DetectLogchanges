@@ -16,7 +16,7 @@ namespace DetectLogchanges
         static List<string> configlist;
 
         /// <summary>
-        /// set hostname, DB connection stringa and read configuration from TabMon.config
+        /// set hostname, DB connection string and read configuration from TabMon.config
         /// </summary>
         static void init()
         {
