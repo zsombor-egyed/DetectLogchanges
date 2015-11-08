@@ -5,7 +5,7 @@ using System.Net;
 namespace DetectLogchanges
 {
     /// <summary>
-    /// TODO: beégetett pareméterekkel kezdeni valamit
+    /// TODO: beégetett pareméterekkel kezdeni valamit, illetve exception handling 
     /// </summary>
     class Program
     {

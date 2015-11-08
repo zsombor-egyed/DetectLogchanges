@@ -73,8 +73,8 @@ namespace DetectLogchanges
                     while ((line = sr.ReadLine()) != null)
                     {
                         offset++;
-                        //pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
-                        Console.WriteLine(line);
+                        pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
+                        Console.WriteLine(Path.GetFileName(fullPath)+": "+line);
                     }
                     pg.closeDB(); //close database connection
                     stateOfFiles[fullPath] += offset;                                     
