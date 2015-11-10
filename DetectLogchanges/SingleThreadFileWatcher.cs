@@ -60,10 +60,11 @@ namespace DetectLogchanges
                     {
                         writeOutChanges(fileName);
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
-                        Console.WriteLine("Unexpected exception occured. " + e.StackTrace);
-                    }                  
+                        Console.WriteLine("Unexpected exception occured. "+e.StackTrace);
+                    }
+
                 }
             }
  
@@ -86,6 +87,7 @@ namespace DetectLogchanges
                     //read the first part of the file (no changes here)
                     for (long i = 0; i < stateOfFiles[fullPath]; i++)
                         sr.ReadLine();
+
                     PostgreSQL pg = new PostgreSQL(dbconn); //open the DB connection
                     //read the new lines which appended to the file
                     while ((line = sr.ReadLine()) != null)
@@ -93,11 +95,11 @@ namespace DetectLogchanges
                         offset++;
                         try {
                             pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
-                          //  Console.WriteLine(Path.GetFileName(fullPath) + ": " + line);
+                            Console.WriteLine(Path.GetFileName(fullPath) + ": " + line);
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Cannot add to database this line: " + line + "\nException: " + e.StackTrace);
+                            Console.WriteLine("Cannot add to database this line: "+line +"\nException: "+ e.StackTrace);
                         }
                     }
                     pg.closeDB(); //close database connection

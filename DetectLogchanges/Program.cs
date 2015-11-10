@@ -35,7 +35,7 @@ namespace DetectLogchanges
                 //read configuration 
                 cfr = new ConfigReader(configFilePath);
                 configlist = cfr.readConfig(); //save configuration
-                if(configlist==null)
+                if (configlist == null)
                 {
                     Console.WriteLine("Could not read the configuration.");
                     System.Environment.Exit(1);

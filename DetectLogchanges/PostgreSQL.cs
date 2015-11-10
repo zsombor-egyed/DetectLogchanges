@@ -62,9 +62,9 @@ namespace DetectLogchanges
             {
                 jsonraw = JsonConvert.DeserializeObject(jsonString);
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                Console.WriteLine("Json parse exception occured. " + e.StackTrace);
+                Console.WriteLine("Json parse exception occured. "+e.StackTrace);
                 return;
             }
 
@@ -121,7 +121,7 @@ namespace DetectLogchanges
             if (cache_key_Value == null)
             {
                 cache_key_Value = jsonraw.v.ToString();
-                //    Console.WriteLine(cache_key_Value);
+            //    Console.WriteLine(cache_key_Value);
             }
 
             if (cache_key_Value == null)
@@ -129,11 +129,11 @@ namespace DetectLogchanges
                 Console.WriteLine("Regex input value was null!");
                 return;
             }
-
+           
 
             string pattern1 = @"<groupfilter function='member' level='(.*?)' member='(.*?)'.*?/>";
 
-            string insertQuery = "INSERT INTO filter_state_audit (ts, pid, tid, req, sess, site, username, filter_name, " +
+            string insertQuery = "INSERT INTO filter_state_audit (ts, pid, tid, req, sess, site, username, filter_name, "+
                 "filter_vals, workbook, view, hostname) VALUES (@ts, @pid, @tid, @req," +
                 "@sess, @site, @username, @filter_name, @filter_vals, @workbook, @view, @hostname)";
 
@@ -165,7 +165,7 @@ namespace DetectLogchanges
             }
 
             //insert all filters
-            string pattern2 = @"<groupfilter function='level-members' level='(.*?)' user:ui-enumeration='(.*?)'.*?/>";
+            string pattern2 = @"<groupfilter function='level-members' level='([^']*?)' user:ui-enumeration='all'.*?/>";
             MatchCollection mc2 = Regex.Matches(cache_key_Value, pattern2);
             foreach (Match m in mc2)
             {
@@ -174,7 +174,7 @@ namespace DetectLogchanges
                 if (level.Contains("Calculation_"))
                     continue;
 
-                member = m.Groups[2].ToString();
+                member = "all";
                 member = member.Replace("&quot;", "");
 
                 var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
