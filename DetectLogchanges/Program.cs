@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 
 namespace DetectLogchanges
 {
     /// <summary>
+    /// Watch some files and when any of it is changing we catch the change and save it to a postgreSQL database.
+    /// 
     /// TODO: beégetett pareméterekkel kezdeni valamit, illetve exception handling 
     /// </summary>
     class Program
@@ -25,12 +29,30 @@ namespace DetectLogchanges
 
             pgsqlConnString = "Server=palettepg.cakavtkziz1k.us-west-1.rds.amazonaws.com;Port=5432;User Id=palette;Password=palette123;Database=TabMon";
             //set config file path
-            configFilePath = @"C:\tmp\TabMon.config";
-            //read configuration 
-            cfr = new ConfigReader(configFilePath);
-            configlist = cfr.readConfig(); //save configuration
+            configFilePath = @"D:\TabMon_FileWatcher\TabMon\Config\TabMon.config";
+            try
+            {
+                //read configuration 
+                cfr = new ConfigReader(configFilePath);
+                configlist = cfr.readConfig(); //save configuration
+                if(configlist==null)
+                {
+                    Console.WriteLine("Could not read the configuration.");
+                    System.Environment.Exit(1);
+                }
+            }
+            catch(IOException e)
+            {
+                System.Console.WriteLine("Could not read the "+ configFilePath+" file. "+e.StackTrace);
+                System.Environment.Exit(1);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                System.Environment.Exit(1);
+            }
         }
-     
+
         static void Main(string[] args)
         {
             init();
@@ -40,7 +62,7 @@ namespace DetectLogchanges
                 pgsqlConnString);
             //start watching the files
             stfw.watchChanges();
-        } 
+        }
 
     }
 }

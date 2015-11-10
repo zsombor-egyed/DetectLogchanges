@@ -10,7 +10,7 @@ namespace DetectLogchanges
         /// <summary>
         /// connection string which contains server name, port, user, passw, and DBname
         /// </summary>
-        string palettepg_conn; 
+        string palettepg_conn;
         NpgsqlConnection TabMon_conn; //connection for TabMon DB
 
         /// <summary>
@@ -49,19 +49,35 @@ namespace DetectLogchanges
         /// <param name="jsonString"></param>
         public void insertToServerlogsTable(String filename, String jsonString)
         {
-            if (palettepg_conn == null || this.palettepg_conn == "")
+            if (palettepg_conn == null || palettepg_conn == "")
                 palettepg_conn = "Server=palettepg.cakavtkziz1k.us-west-1.rds.amazonaws.com;Port=5432;User Id=palette;Password=palette123;Database=TabMon";
- 
-            if(TabMon_conn == null)
-                TabMon_conn = new NpgsqlConnection(palettepg_conn); 
+
+            if (TabMon_conn == null)
+                TabMon_conn = new NpgsqlConnection(palettepg_conn);
 
             // stackoverflow.com/questions/6620165/how-can-i-parse-json-with-c
             //parse the jsonString (to object)
-            dynamic jsonraw = JsonConvert.DeserializeObject(jsonString);
+            dynamic jsonraw = null;
+            try
+            {
+                jsonraw = JsonConvert.DeserializeObject(jsonString);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Json parse exception occured. "+e.StackTrace);
+                return;
+            }
+
 
             //if we find "eqc-log-cache-key" key then we inseret into filter_state_audit table
             if (jsonraw.k == "eqc-log-cache-key")
+            {
                 insertToFilterState(jsonString);
+            }
+            else if (jsonraw.k == "qp-batch-summary")
+            {
+                insertToFilterState(jsonString);
+            }
 
             string tid = jsonraw.tid;
 
@@ -101,6 +117,19 @@ namespace DetectLogchanges
             string member;
 
             string cache_key_Value = jsonraw.v["cache-key"];
+            if (cache_key_Value == null)
+            {
+                cache_key_Value = jsonraw.v.ToString();
+            //    Console.WriteLine(cache_key_Value);
+            }
+
+            if (cache_key_Value == null)
+            {
+                Console.WriteLine("Regex input value was null!");
+                return;
+            }
+           
+
             string pattern1 = @"<groupfilter function='member' level='(.*?)' member='(.*?)'.*?/>";
 
             string insertQuery = "INSERT INTO filter_state_audit VALUES (@ts, @pid, @tid, @req," +
@@ -209,7 +238,7 @@ namespace DetectLogchanges
         /// </summary>
         ~PostgreSQL()
         {
-            if(TabMon_conn != null)
+            if (TabMon_conn != null)
                 TabMon_conn.Close();
         }
     }

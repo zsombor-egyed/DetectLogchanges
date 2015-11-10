@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Permissions;
 using System.Text;
+using System.Threading;
 
 namespace DetectLogchanges
 {
@@ -21,6 +22,11 @@ namespace DetectLogchanges
             initFileState();
         }
 
+        /// <summary>
+        /// Read the initial state of files. 
+        /// Count how many lines are in a file.
+        /// Take the results to a Dictionary<string, long> (filename, line count)
+        /// </summary>
         void initFileState()
         {
             string[] fileEntries = Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories);
@@ -29,32 +35,45 @@ namespace DetectLogchanges
                 long numberOfLines = 0;
                 using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite))
                 using (var sr = new StreamReader(fs))
-                {                    
+                {
                     while (sr.ReadLine() != null)
                         numberOfLines++;
                 }
                 if (!stateOfFiles.ContainsKey(fileName))
                     stateOfFiles.Add(fileName, numberOfLines);
-                Console.WriteLine(fileName+": "+ numberOfLines);
+                Console.WriteLine(fileName + ": " + numberOfLines);
             }
         }
 
-        [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
+        /// <summary>
+        /// Go over the files in a specific folder, and watch for changes.
+        /// </summary>                  
         public void watchChanges()
         {
-            // https://msdn.microsoft.com/en-us/library/system.io.filesystemwatcher(v=vs.110).aspx
-            FileSystemWatcher watcher = new FileSystemWatcher(Path.GetDirectoryName(watchedFolderPath), filter);
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
-            watcher.Changed += new FileSystemEventHandler(OnChanged);
-            watcher.Created += new FileSystemEventHandler(OnChanged);
-
-            // Begin watching.
-            watcher.EnableRaisingEvents = true;
-            // Wait for the user to quit the program.
-            Console.WriteLine("Press \'q\' to quit the program.");
-            while (Console.Read() != 'q') ;
+            while (true)
+            {
+                Thread.Sleep(1500);
+                string[] fileEntries = Directory.GetFiles(watchedFolderPath, filter, SearchOption.AllDirectories);
+                foreach (string fileName in fileEntries)
+                {
+                    try
+                    {
+                        writeOutChanges(fileName);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Unexpected exception occured. " + e.StackTrace);
+                    }                  
+                }
+            }
+ 
         }
 
+        /// <summary>
+        /// Read a specific file, and insert the new lines to the database. 
+        /// 
+        /// </summary>
+        /// <param name="fullPath"></param>
         static void writeOutChanges(string fullPath)
         {
             if (stateOfFiles.ContainsKey(fullPath))
@@ -73,11 +92,17 @@ namespace DetectLogchanges
                     while ((line = sr.ReadLine()) != null)
                     {
                         offset++;
-                        pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
-                        Console.WriteLine(Path.GetFileName(fullPath)+": "+line);
+                        try {
+                            pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
+                          //  Console.WriteLine(Path.GetFileName(fullPath) + ": " + line);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Cannot add to database this line: " + line + "\nException: " + e.StackTrace);
+                        }
                     }
                     pg.closeDB(); //close database connection
-                    stateOfFiles[fullPath] += offset;                                     
+                    stateOfFiles[fullPath] += offset;
                 }
             }
             else
@@ -91,12 +116,6 @@ namespace DetectLogchanges
                     stateOfFiles.Add(fullPath, lineCounter);
                 }
             }
-        }
-
-        // Define the event handlers.
-        private static void OnChanged(object source, FileSystemEventArgs e)
-        {
-            writeOutChanges(e.FullPath);
         }
     }
 }
