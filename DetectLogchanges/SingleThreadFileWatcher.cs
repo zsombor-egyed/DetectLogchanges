@@ -86,7 +86,6 @@ namespace DetectLogchanges
                     //read the first part of the file (no changes here)
                     for (long i = 0; i < stateOfFiles[fullPath]; i++)
                         sr.ReadLine();
-
                     PostgreSQL pg = new PostgreSQL(dbconn); //open the DB connection
                     //read the new lines which appended to the file
                     while ((line = sr.ReadLine()) != null)

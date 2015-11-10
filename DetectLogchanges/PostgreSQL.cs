@@ -43,7 +43,7 @@ namespace DetectLogchanges
         /// {"ts":"2015-11-04T09:35:44.862","pid":11108,"tid":"ac0","sev":"debug","req":"VjnRcApWDfQAAAyQpz0AAAFE",
         /// "sess":"53F596BD0FA8479CA0860F36F27B2346-0:0","site":"Default","user":"tfoldi","k":"msg",
         ///    "v":"   [Time] Building the tuples took 0.0000 sec."}
-        /// parse it, and take it to the dataebase. 
+        /// parse it, and insert it to the dataebase. 
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="jsonString"></param>
@@ -62,9 +62,9 @@ namespace DetectLogchanges
             {
                 jsonraw = JsonConvert.DeserializeObject(jsonString);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                Console.WriteLine("Json parse exception occured. "+e.StackTrace);
+                Console.WriteLine("Json parse exception occured. " + e.StackTrace);
                 return;
             }
 
@@ -81,8 +81,9 @@ namespace DetectLogchanges
 
             string tid = jsonraw.tid;
 
-            string insertQuery = "INSERT INTO Serverlogs VALUES (@filename, @host_name, @ts, @pid, @tid, @sev, @req," +
-                "@sess, @site, @username, @k, @v)";
+            string insertQuery = "INSERT INTO Serverlogs (filename, host_name, ts, pid, tid, sev, req, sess, site, username, k, v)" +
+                "VALUES (@filename, @host_name, @ts, @pid, @tid, @sev, @req, @sess, @site, @username, @k, @v)";
+
             var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
             insert_cmd.Parameters.AddWithValue("@filename", NpgsqlTypes.NpgsqlDbType.Text, filename);
             insert_cmd.Parameters.AddWithValue("@host_name", NpgsqlTypes.NpgsqlDbType.Text, Program.strHostName);
@@ -120,7 +121,7 @@ namespace DetectLogchanges
             if (cache_key_Value == null)
             {
                 cache_key_Value = jsonraw.v.ToString();
-            //    Console.WriteLine(cache_key_Value);
+                //    Console.WriteLine(cache_key_Value);
             }
 
             if (cache_key_Value == null)
@@ -128,12 +129,13 @@ namespace DetectLogchanges
                 Console.WriteLine("Regex input value was null!");
                 return;
             }
-           
+
 
             string pattern1 = @"<groupfilter function='member' level='(.*?)' member='(.*?)'.*?/>";
 
-            string insertQuery = "INSERT INTO filter_state_audit VALUES (@ts, @pid, @tid, @req," +
-                "@sess, @site, @username, @filter_name, @filter_vals, @workbook, @view)";
+            string insertQuery = "INSERT INTO filter_state_audit (ts, pid, tid, req, sess, site, username, filter_name, " +
+                "filter_vals, workbook, view, hostname) VALUES (@ts, @pid, @tid, @req," +
+                "@sess, @site, @username, @filter_name, @filter_vals, @workbook, @view, @hostname)";
 
             if (TabMon_conn.State != System.Data.ConnectionState.Open)
                 TabMon_conn.Open();
@@ -158,8 +160,38 @@ namespace DetectLogchanges
                 insert_cmd.Parameters.AddWithValue("@filter_vals", NpgsqlTypes.NpgsqlDbType.Text, member);
                 insert_cmd.Parameters.AddWithValue("@workbook", NpgsqlTypes.NpgsqlDbType.Text, "");
                 insert_cmd.Parameters.AddWithValue("@view", NpgsqlTypes.NpgsqlDbType.Text, "");
+                insert_cmd.Parameters.AddWithValue("@hostname", NpgsqlTypes.NpgsqlDbType.Text, Program.strHostName);
                 insert_cmd.ExecuteNonQuery();
+            }
 
+            //insert all filters
+            string pattern2 = @"<groupfilter function='level-members' level='(.*?)' user:ui-enumeration='(.*?)'.*?/>";
+            MatchCollection mc2 = Regex.Matches(cache_key_Value, pattern2);
+            foreach (Match m in mc2)
+            {
+                level = m.Groups[1].ToString();
+                //if we find calculation we throw it out (dont insert to DB)
+                if (level.Contains("Calculation_"))
+                    continue;
+
+                member = m.Groups[2].ToString();
+                member = member.Replace("&quot;", "");
+
+                var insert_cmd = new NpgsqlCommand(insertQuery, TabMon_conn);
+
+                insert_cmd.Parameters.AddWithValue("@ts", NpgsqlTypes.NpgsqlDbType.Timestamp, jsonraw.ts);
+                insert_cmd.Parameters.AddWithValue("@pid", NpgsqlTypes.NpgsqlDbType.Integer, (int)jsonraw.pid);
+                insert_cmd.Parameters.AddWithValue("@tid", NpgsqlTypes.NpgsqlDbType.Integer, Convert.ToInt32(tid, 16));
+                insert_cmd.Parameters.AddWithValue("@req", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.req);
+                insert_cmd.Parameters.AddWithValue("@sess", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.sess);
+                insert_cmd.Parameters.AddWithValue("@site", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.site);
+                insert_cmd.Parameters.AddWithValue("@username", NpgsqlTypes.NpgsqlDbType.Text, jsonraw.user);
+                insert_cmd.Parameters.AddWithValue("@filter_name", NpgsqlTypes.NpgsqlDbType.Text, level);
+                insert_cmd.Parameters.AddWithValue("@filter_vals", NpgsqlTypes.NpgsqlDbType.Text, member);
+                insert_cmd.Parameters.AddWithValue("@workbook", NpgsqlTypes.NpgsqlDbType.Text, "");
+                insert_cmd.Parameters.AddWithValue("@view", NpgsqlTypes.NpgsqlDbType.Text, "");
+                insert_cmd.Parameters.AddWithValue("@hostname", NpgsqlTypes.NpgsqlDbType.Text, Program.strHostName);
+                insert_cmd.ExecuteNonQuery();
             }
         }
 
