@@ -144,6 +144,9 @@ namespace DetectLogchanges
             foreach (Match m in mc)
             {
                 level = m.Groups[1].ToString();
+                if (level.Contains("Calculation_"))
+                    continue;
+
                 member = m.Groups[2].ToString();
                 member = member.Replace("&quot;", "");
 

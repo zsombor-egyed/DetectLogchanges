@@ -95,7 +95,7 @@ namespace DetectLogchanges
                         offset++;
                         try {
                             pg.insertToServerlogsTable(Path.GetFileName(fullPath), line);
-                            Console.WriteLine(Path.GetFileName(fullPath) + ": " + line);
+                            Console.WriteLine(line);
                         }
                         catch (Exception e)
                         {
